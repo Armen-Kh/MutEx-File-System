@@ -7,8 +7,17 @@
 
 int main()
 {
-    close(1);   // closing stdout, and as a result number "1" became free
-    int fd = open("anomaly", O_CREAT | O_WRONLY, 0666);  // open returns the minimal free number which is "1" in our case
-    std::cout << "Writing to anomaly file!"  << ", FD=" << fd;    // so, now std::cout prints in opened file instead of stdout
+    close(1);   
+    // Closes stdout (file descriptor 1). 
+    // FD 1 becomes available for reuse by the kernel.
+    
+    int fd = open("anomaly", O_CREAT | O_WRONLY, 0666);
+    // open() returns the lowest available file descriptor.
+    // Since 1 was just freed, it is reused and assigned to this file.
+    
+    std::cout << "Writing to anomaly file!"  << ", FD=" << fd;
+    // However, since FD 1 (stdout) is now associated with "anomaly",
+    // low-level writes to stdout (write(1, ...)) will go to the file.
+    // std::cout itself may still be buffered/untied unless explicitly synced.
 } 
 
